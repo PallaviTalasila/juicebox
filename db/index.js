@@ -2,8 +2,6 @@ const { Client } = require("pg"); // imports the pg module
 
 const client = new Client("postgres://localhost:5432/juicebox-dev");
 
-
-
 /**
  * USER Methods
  */
@@ -289,6 +287,13 @@ async function getPostById(postId) {
       [postId]
     );
 
+    if (!post) {
+      throw {
+        name: "PostNotFoundError",
+        message: "Could not find a post with that postId",
+      };
+    }
+
     const { rows: tags } = await client.query(
       `
       SELECT tags.*
@@ -374,14 +379,12 @@ async function getPostsByTagName(tagName) {
   }
 }
 
-
-
 async function getAllTags() {
   try {
-    const tags  = await client.query(`
+    const tags = await client.query(`
       SELECT *
       FROM tags;
-    `);  
+    `);
 
     console.log(tags);
 
@@ -393,11 +396,16 @@ async function getAllTags() {
 
 async function getUserByUsername(username) {
   try {
-    const { rows: [user] } = await client.query(`
+    const {
+      rows: [user],
+    } = await client.query(
+      `
       SELECT *
       FROM users
       WHERE username=$1;
-    `, [username]);
+    `,
+      [username]
+    );
 
     return user;
   } catch (error) {
@@ -418,5 +426,6 @@ module.exports = {
   addTagsToPost,
   getPostsByTagName,
   getAllTags,
-  getUserByUsername
+  getUserByUsername,
+  getPostById,
 };
