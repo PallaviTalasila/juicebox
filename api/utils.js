@@ -8,7 +8,19 @@ function requireUser(req, res, next) {
   
     next();
   }
+
+  function requireActiveUser(req, res, next) {
+    if (!req.user.active) {
+      next({
+        name: "UserInactiveError",
+        message: "That user is inactive"
+      });
+    }
+  
+    next();
+  }
   
   module.exports = {
-    requireUser
+    requireUser,
+    requireActiveUser
   }
